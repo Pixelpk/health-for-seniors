@@ -24,7 +24,12 @@
     "sourceMap": true,
     "strict": true,
     "target": "ESNext",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "@services/*": ["./src/services/*"],
+      "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"]
+    }
   },
   "exclude": ["node_modules"],
   "include": ["**/*.cjs", "**/*.mjs", "**/*.ts", "**/*.tsx"]
