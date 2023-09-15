@@ -10,7 +10,7 @@ import NavbarSidebarLayout from "../layouts/navbar-sidebar";
 const DashboardPage: FC = function () {
   return (
     <NavbarSidebarLayout>
-      {/* <div className="px-4 pt-6">
+      <div className="px-4 pt-6">
         <SalesThisWeek />
         <div className="mt-4 grid w-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <NewProductsThisWeek />
@@ -25,7 +25,7 @@ const DashboardPage: FC = function () {
           </div>
         </div>
         <Transactions />
-      </div> */}
+      </div>
     </NavbarSidebarLayout>
   );
 };

@@ -1,12 +1,14 @@
 import type { FC } from "react";
-import { Routes, Route } from "react-router";
+import { Route, Routes } from "react-router";
 import { BrowserRouter } from "react-router-dom";
-import DashboardPage from "./pages";
+import FlowbiteWrapper from "./components/flowbite-wrapper";
 import ForgotPasswordPage from "./pages/authentication/forgot-password";
 import ProfileLockPage from "./pages/authentication/profile-lock";
 import ResetPasswordPage from "./pages/authentication/reset-password";
 import SignInPage from "./pages/authentication/sign-in";
 import SignUpPage from "./pages/authentication/sign-up";
+import ContactsListPage from "./pages/contacts/list";
+import DriveListPage from "./pages/drive/list";
 import EcommerceBillingPage from "./pages/e-commerce/billing";
 import EcommerceInvoicePage from "./pages/e-commerce/invoice";
 import EcommerceProductsPage from "./pages/e-commerce/products";
@@ -23,15 +25,16 @@ import UserFeedPage from "./pages/users/feed";
 import UserListPage from "./pages/users/list";
 import UserProfilePage from "./pages/users/profile";
 import UserSettingsPage from "./pages/users/settings";
-import FlowbiteWrapper from "./components/flowbite-wrapper";
 
 const App: FC = function () {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<FlowbiteWrapper />}>
-          <Route path="/" element={<DashboardPage />} index />
+          <Route path="/" element={<MailingComposePage />} index />
           <Route path="/mailing/compose" element={<MailingComposePage />} />
+          <Route path="/contacts" element={<ContactsListPage />} />
+          <Route path="/drive" element={<DriveListPage />} />
           <Route path="/mailing/inbox" element={<MailingInboxPage />} />
           <Route path="/mailing/read" element={<MailingReadPage />} />
           <Route path="/mailing/reply" element={<MailingReplyPage />} />
