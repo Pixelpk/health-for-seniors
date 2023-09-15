@@ -1,4 +1,4 @@
-import { config } from '@config';
+import { config } from "@config";
 
 /**
  * Adds prefix in the following format
@@ -6,7 +6,7 @@ import { config } from '@config';
  * `{PROJECT NAME}-{CURRENT ENV}-{PASSED STRING}`
  */
 export const projectPrefix = (str?: string) => {
-  const prefix = `${config.app}-${config.app}`;
+  const prefix = `${config.app.name}-${config.app.env}`;
 
   return str ? `${prefix}-${str}` : prefix;
 };
