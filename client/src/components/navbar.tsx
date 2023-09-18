@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Avatar, Button, Navbar } from "flowbite-react";
+import { Avatar, Button, Navbar, Tooltip } from "flowbite-react";
 import type { FC } from "react";
 import { FaUserGroup } from "react-icons/fa6";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
@@ -37,30 +37,27 @@ const ExampleNavbar: FC = function () {
                 src="https://flowbite.com/docs/images/logo.svg"
                 className="mr-3 h-6 sm:h-8"
               />
-              <span className="self-center whitespace-nowrap text-2xl font-semibold dark:text-white">
-                Flowbite
-              </span>
             </Navbar.Brand>
           </div>
           <div className="flex items-center gap-3 ">
-            <span className="relative inline-flex items-center p-0 text-sm font-medium text-center">
-              <FaUserGroup className="w-7 h-7" />
-              <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
-                20
-              </div>
-            </span>
-            <span className="relative inline-flex items-center p-0 text-sm font-medium text-center">
-              <MdEmail className="w-7  h-7 " />
-              <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
-                20
-              </div>
-            </span>
+            <Tooltip content="Contacts" style="light">
+              <span className="relative inline-flex items-center p-0 text-sm font-medium text-center">
+                <FaUserGroup className="w-7 h-7" />
+                <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
+                  20
+                </div>
+              </span>
+            </Tooltip>
+            <Tooltip content="Emails" style="light">
+              <span className="relative inline-flex items-center p-0 text-sm font-medium text-center">
+                <MdEmail className="w-7  h-7 " />
+                <div className="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
+                  20
+                </div>
+              </span>
+            </Tooltip>
             <div className="flex items-center">
-              <Button
-                color="primary"
-                outline
-                onClick={() => navigate("/drive")}
-              >
+              <Button color="light" onClick={() => navigate("/drive")}>
                 Live Drive
               </Button>
             </div>

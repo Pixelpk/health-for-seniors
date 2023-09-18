@@ -4,13 +4,22 @@ import {
   Card,
   Pagination as FBPagination,
   Label,
+  Modal,
+  Progress,
   Table,
   TextInput,
+  Textarea,
 } from "flowbite-react";
 import { FC, useState } from "react";
 import { FcFolder } from "react-icons/fc";
-import { HiChevronLeft, HiChevronRight, HiSearch } from "react-icons/hi";
+import {
+  HiChevronLeft,
+  HiChevronRight,
+  HiSearch,
+  HiUpload,
+} from "react-icons/hi";
 import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
+import { FaPlus } from "react-icons/fa6";
 
 const DriveListPage: FC = function () {
   return (
@@ -40,9 +49,15 @@ const DriveListPage: FC = function () {
         </div>
       </div>
       <Card className="m-5">
-        <h6 className="text-lg font-semibold text-gray-900 dark:text-white ">
-          My Folder
-        </h6>
+        <div className="flex w-full items-center justify-between">
+          <h6 className="text-lg font-semibold text-gray-900 dark:text-white ">
+            My Folder
+          </h6>
+          <div className="flex w-full items-center justify-end gap-2">
+            <CreateFolderModal />
+            <UploadFileModal />
+          </div>
+        </div>
         <div className="flex flex-col">
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
@@ -132,6 +147,90 @@ export const Pagination: FC = function () {
         />
       </div>
     </div>
+  );
+};
+const UploadFileModal: FC = function () {
+  const [isOpen, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button color="primary" onClick={() => setOpen(!isOpen)}>
+        <FaPlus className="mr-3 text-sm" />
+        Upload file
+      </Button>
+      <Modal onClose={() => setOpen(false)} show={isOpen}>
+        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+          <strong>Upload File</strong>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="lg:col-span-2 gap-1">
+                <div className="flex w-full items-center justify-center">
+                  <label className="flex h-32 w-full cursor-pointer flex-col rounded border-2 border-dashed border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-700">
+                    <div className="flex flex-col items-center justify-center pb-6 pt-5">
+                      <HiUpload className="text-4xl text-gray-300" />
+                      <p className="py-1 text-sm text-gray-600 dark:text-gray-500">
+                        Upload a file or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
+                    </div>
+                    <input type="file" className="hidden" />
+                  </label>
+                </div>
+                <div className="my-3 flex justify-between">
+                  <div className="text-sm font-medium">
+                    General Information.txt
+                  </div>
+                  <div className="text-sm font-medium">45%</div>
+                </div>
+                <Progress progress={45} color="dark" />
+              </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer className="flex justify-end">
+          <Button color="primary" onClick={() => setOpen(false)}>
+            Upload
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  );
+};
+const CreateFolderModal: FC = function () {
+  const [isOpen, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button color="light" onClick={() => setOpen(!isOpen)}>
+        <FaPlus className="mr-3 text-sm" />
+        Create Folder
+      </Button>
+      <Modal onClose={() => setOpen(false)} show={isOpen} size={"md"}>
+        <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
+          <strong>Create Folder</strong>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <TextInput
+              id="search"
+              placeholder="add folder name"
+              required
+              size={32}
+              type="search"
+            />
+          </form>
+        </Modal.Body>
+        <Modal.Footer className="flex justify-end">
+          <Button color="primary" onClick={() => setOpen(false)}>
+            Create
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

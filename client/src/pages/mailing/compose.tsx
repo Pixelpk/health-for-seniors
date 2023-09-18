@@ -1,10 +1,22 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Button, Card, Label, Textarea, TextInput } from "flowbite-react";
-import type { FC } from "react";
-import { HiArrowRight, HiSearch } from "react-icons/hi";
+import {
+  Button,
+  Card,
+  Label,
+  Modal,
+  TextInput,
+  Textarea,
+} from "flowbite-react";
+import { useState, type FC } from "react";
+import { HiArrowRight, HiSearch, HiUpload } from "react-icons/hi";
+import ReactQuill from "react-quill";
+import Select from "react-select/creatable";
 import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
+import "react-quill/dist/quill.snow.css";
+import { FaPlus } from "react-icons/fa6";
 
 const MailingComposePage: FC = function () {
+  const [value, setValue] = useState("");
   return (
     <NavbarSidebarLayout isFooter={false}>
       <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 py-6 dark:border-gray-700 dark:bg-gray-800 sm:flex">
@@ -40,10 +52,13 @@ const MailingComposePage: FC = function () {
         <form className="bottom-0 right-0 bg-white p-4 pt-8 dark:border-gray-700 dark:bg-gray-900">
           <div className="mb-4 space-y-4 lg:mb-5 lg:pl-4">
             <div>
-              <Label htmlFor="message-to" className="sr-only">
-                To
-              </Label>
-              <TextInput id="message-to" name="message-to" placeholder="To" />
+              <Select
+                options={[]}
+                placeholder="add recepients"
+                isMulti
+                isClearable
+                classNamePrefix="select"
+              />
             </div>
             <div>
               <Label htmlFor="message-subject" className="sr-only">
@@ -55,19 +70,17 @@ const MailingComposePage: FC = function () {
                 placeholder="Subject"
               />
             </div>
-            <div>
-              <Label htmlFor="reply-mail" className="sr-only">
-                Your message
-              </Label>
-              <Textarea
-                id="reply-mail"
-                name="reply-mail"
-                placeholder="Write text here ..."
-                rows={24}
+            <div className="h-80">
+              <ReactQuill
+                className="h-3/4 md:h-3/4"
+                theme="snow"
+                value={value}
+                onChange={setValue}
+                placeholder="Write email text..."
               />
             </div>
           </div>
-          <div className="items-center dark:divide-gray-700 sm:flex sm:divide-x sm:divide-gray-100 lg:pl-4 justify-end">
+          <div className="items-center dark:divide-gray-700 flex sm:divide-x sm:divide-gray-100 lg:pl-4 justify-end">
             <div className="mb-3 space-y-3 sm:mb-0 sm:flex sm:space-y-0 ">
               <Button color="primary" type="submit">
                 <div className="flex items-center gap-x-2">

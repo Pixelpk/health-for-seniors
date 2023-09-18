@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { Button, Label, TextInput } from "flowbite-react";
-import type { FC } from "react";
+import { FC } from "react";
 import { useNavigate } from "react-router";
 
 const SignInPage: FC = function () {
