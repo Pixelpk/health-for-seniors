@@ -8,6 +8,7 @@ import * as yup from "yup";
 import { login } from "../../services/auth";
 import { HiInformationCircle } from "react-icons/hi";
 import { UserContext } from "../../context/UserContext";
+import { readContacts } from "../../services/contact";
 
 const schema = yup.object().shape({
   email: yup
@@ -42,8 +43,22 @@ const SignInPage: FC = function () {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsSubmitting(true);
     login(data)
-      .then(() => {
-        setUserInfo({ email: data.email });
+      .then(async () => {
+        const users = await readContacts();
+        console.log(
+          users.data.filter(
+            (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+          )
+        );
+        users.data.filter(
+          (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+        );
+        setUserInfo({
+          data: users.data.filter(
+            (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
+          ),
+          email: data.email,
+        });
         setIsSubmitting(false);
         navigate("/");
       })

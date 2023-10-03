@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Card, HelperText, Label, TextInput } from "flowbite-react";
-import { type FC } from "react";
+import { useContext, type FC } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiArrowRight, HiSearch } from "react-icons/hi";
 import ReactQuill from "react-quill";
@@ -10,6 +10,10 @@ import Select from "react-select/creatable";
 import * as yup from "yup";
 import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
 import { sendEmail } from "../../services/email";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { UserContext } from "../../context/UserContext";
+import moment from "moment";
 
 const schema = yup.object().shape({
   recipient: yup
@@ -33,44 +37,43 @@ const MailingComposePage: FC = function () {
     handleSubmit,
     control,
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
   });
-
+  const { userInfo } = useContext(UserContext);
   const onSubmit = async (data: any) => {
     const emailRecipients = data.recipient.map((rec: any) => rec.value);
     sendEmail({
       recipients: emailRecipients,
       subject: data.subject,
       emailText: data.text,
-    }).then((res) => console.log("res", res));
+    })
+      .then((res) => {
+        toast.success("Email Sent !", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+        reset();
+      })
+      .catch(() => {
+        toast.error("Something went wrong !", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      });
   };
 
   return (
     <NavbarSidebarLayout isFooter={false}>
+      <ToastContainer />
       <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 py-6 dark:border-gray-700 dark:bg-gray-800 sm:flex">
         <div className="flex items-center justify-between divide-x divide-gray-100 dark:divide-gray-700 w-full">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-            Neil Sims
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl capitalize">
+            {userInfo?.data[0]?.name}
             <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
-              Monday, March 22, 2023
+              {moment().format("DD MMMM YYYY")}
             </p>
           </h1>
-          <form>
-            <Label htmlFor="search" className="sr-only">
-              Search
-            </Label>
-            <TextInput
-              icon={HiSearch}
-              id="search"
-              name="search"
-              placeholder="Search"
-              required
-              size={32}
-              type="search"
-            />
-          </form>
         </div>
       </div>
       <Card className="m-5">
@@ -137,7 +140,7 @@ const MailingComposePage: FC = function () {
           </div>
           <div className="items-center dark:divide-gray-700 flex sm:divide-x sm:divide-gray-100 lg:pl-4 justify-end">
             <div className="mb-3 space-y-3 sm:mb-0 sm:flex sm:space-y-0 ">
-              <Button color="primary" type="submit">
+              <Button color="primary" type="submit" disabled={isSubmitting}>
                 <div className="flex items-center gap-x-2">
                   Send <HiArrowRight className="text-lg" />
                 </div>

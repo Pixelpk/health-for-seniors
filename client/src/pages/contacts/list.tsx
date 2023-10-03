@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import {
+  Avatar,
   Button,
   Card,
   Pagination as FBPagination,
@@ -7,20 +8,56 @@ import {
   Table,
   TextInput,
 } from "flowbite-react";
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { HiChevronLeft, HiChevronRight, HiSearch } from "react-icons/hi";
 import { ImFilesEmpty } from "react-icons/im";
+import { useQuery } from "@tanstack/react-query";
 import NavbarSidebarLayout from "../../layouts/navbar-sidebar";
+import { readContacts } from "../../services/contact";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
+import moment from "moment";
+import { filter } from "lodash";
+import { FileSharingContext } from "../../context/FileSharingContext";
+
+interface Contact {
+  name: string;
+  email: string;
+  recentActivity: string;
+}
 
 const ContactsListPage: FC = function () {
+  const { userInfo } = useContext(UserContext);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: readContacts,
+  });
+
+  function applySortFilter(array, query) {
+    if (query) {
+      return filter(array, (data) => {
+        const values = Object.values(data);
+        return values.some(
+          (val) =>
+            (typeof val === "string" || typeof val === "number") &&
+            val.toString().toLowerCase().indexOf(query.toLowerCase()) !== -1
+        );
+      });
+    }
+    return array;
+  }
+  const filteredData = applySortFilter(data?.data ?? [], searchQuery);
+
   return (
     <NavbarSidebarLayout isFooter={false}>
       <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex">
         <div className="flex items-center justify-between divide-x divide-gray-100 dark:divide-gray-700 w-full">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-            Neil Sims
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl capitalize">
+            {userInfo?.["data"][0]?.name}
             <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
-              Monday, March 22, 2023
+              {moment().format("DD MMMM YYYY")}
             </p>
           </h1>
           <form>
@@ -35,6 +72,7 @@ const ContactsListPage: FC = function () {
               required
               size={32}
               type="search"
+              onChange={(e: any) => setSearchQuery(e.target.value)}
             />
           </form>
         </div>
@@ -47,103 +85,81 @@ const ContactsListPage: FC = function () {
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
               <div className="overflow-hidden shadow">
-                <AllUsersTable />
+                <AllUsersTable contacts={filteredData ?? []} />
               </div>
             </div>
           </div>
         </div>
-        <Pagination />
+        {/* <Pagination contacts={data?.data ?? []} /> */}
       </Card>
     </NavbarSidebarLayout>
   );
 };
 
-const AllUsersTable: FC = function () {
+const AllUsersTable: FC<{ contacts: Contact[] }> = function ({ contacts }) {
+  const navigate = useNavigate();
+  const { userInfo } = useContext(UserContext);
+  const { setUserInfo } = useContext(FileSharingContext);
+
   return (
     <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
       <Table.Head className="bg-gray-100 dark:bg-gray-700">
         <Table.HeadCell>Name</Table.HeadCell>
         <Table.HeadCell>Email</Table.HeadCell>
-        <Table.HeadCell>Recent Activity</Table.HeadCell>
+        <Table.HeadCell>Creation Date</Table.HeadCell>
         <Table.HeadCell></Table.HeadCell>
       </Table.Head>
       <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0">
-            <img
-              className="h-10 w-10 rounded-full"
-              src="../../images/users/neil-sims.png"
-              alt="Neil Sims avatar"
-            />
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              <div className="text-base font-semibold text-gray-900 dark:text-white">
-                Neil Sims
-              </div>
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              neil.sims@flowbite.com
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              20 Aug 2023
-            </div>
-          </Table.Cell>
-
-          <Table.Cell>
-            <div className="flex items-center gap-x-3 whitespace-nowrap">
-              <Button color="primary">
-                <div className="flex items-center gap-x-2">
-                  <ImFilesEmpty className="text-lg" />
-                  View Files
+        {contacts
+          .filter(
+            (contact: any) =>
+              contact.email.toLowerCase() !== userInfo?.["email"].toLowerCase()
+          )
+          .map((user) => (
+            <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
+              <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0">
+                <Avatar rounded />
+                <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  <div className="text-base font-semibold text-gray-900 dark:text-white">
+                    {user.name}
+                  </div>
                 </div>
-              </Button>
-            </div>
-          </Table.Cell>
-        </Table.Row>
-        <Table.Row className="hover:bg-gray-100 dark:hover:bg-gray-700">
-          <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0">
-            <img
-              className="h-10 w-10 rounded-full"
-              src="../../images/users/neil-sims.png"
-              alt="Neil Sims avatar"
-            />
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              <div className="text-base font-semibold text-gray-900 dark:text-white">
-                Neil Sims
-              </div>
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              neil.sims@flowbite.com
-            </div>
-          </Table.Cell>
-          <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-            <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              20 Aug 2023
-            </div>
-          </Table.Cell>
-
-          <Table.Cell>
-            <div className="flex items-center gap-x-3 whitespace-nowrap">
-              <Button color="primary">
-                <div className="flex items-center gap-x-2">
-                  <ImFilesEmpty className="text-lg" />
-                  View Files
+              </Table.Cell>
+              <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  {user.email}
                 </div>
-              </Button>
-            </div>
-          </Table.Cell>
-        </Table.Row>
+              </Table.Cell>
+              <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                  20 Aug 2023
+                </div>
+              </Table.Cell>
+
+              <Table.Cell>
+                <div className="flex items-center gap-x-3 whitespace-nowrap">
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      setUserInfo(user);
+                      navigate({ pathname: "/drive" });
+                    }}
+                  >
+                    <div className="flex items-center gap-x-2">
+                      <ImFilesEmpty className="text-lg" />
+                      View Files
+                    </div>
+                  </Button>
+                </div>
+              </Table.Cell>
+            </Table.Row>
+          ))}
       </Table.Body>
     </Table>
   );
 };
 
-export const Pagination: FC = function () {
+export const Pagination: FC<{ contacts: Contact[] }> = function ({ contacts }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   return (
@@ -170,7 +186,7 @@ export const Pagination: FC = function () {
           </span>
           &nbsp;of&nbsp;
           <span className="font-semibold text-gray-900 dark:text-white">
-            2290
+            {contacts.length}
           </span>
         </span>
       </div>
@@ -180,7 +196,7 @@ export const Pagination: FC = function () {
           onPageChange={(page) => {
             setCurrentPage(page);
           }}
-          totalPages={100}
+          totalPages={contacts.length}
         />
       </div>
     </div>

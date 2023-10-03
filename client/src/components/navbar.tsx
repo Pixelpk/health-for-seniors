@@ -1,16 +1,21 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { Avatar, Button, Navbar, Tooltip } from "flowbite-react";
-import type { FC } from "react";
+import { useContext, type FC } from "react";
 import { FaUserGroup } from "react-icons/fa6";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { useSidebarContext } from "../context/SidebarContext";
 import isSmallScreen from "../helpers/is-small-screen";
+import { FileSharingContext } from "../context/FileSharingContext";
+import { UserContext } from "../context/UserContext";
 
 const ExampleNavbar: FC = function () {
   const { isOpenOnSmallScreens, isPageWithSidebar, setOpenOnSmallScreens } =
     useSidebarContext();
+  const { setUserInfo } = useContext(FileSharingContext);
+  const { userInfo } = useContext(UserContext);
+
   const navigate = useNavigate();
 
   return (
@@ -57,7 +62,13 @@ const ExampleNavbar: FC = function () {
               </span>
             </Tooltip>
             <div className="flex items-center">
-              <Button color="light" onClick={() => navigate("/drive")}>
+              <Button
+                color="light"
+                onClick={() => {
+                  setUserInfo(userInfo?.["data"][0]);
+                  navigate("/drive");
+                }}
+              >
                 Live Drive
               </Button>
             </div>
