@@ -3,7 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Card, HelperText, Label, TextInput } from "flowbite-react";
 import { useContext, type FC } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HiArrowRight, HiSearch } from "react-icons/hi";
+import { HiArrowRight } from "react-icons/hi";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Select from "react-select/creatable";
@@ -50,7 +50,7 @@ const MailingComposePage: FC = function () {
       subject: data.subject,
       emailText: data.text,
     })
-      .then((res) => {
+      .then(() => {
         toast.success("Email Sent !", {
           position: toast.POSITION.TOP_RIGHT,
         });
@@ -69,7 +69,7 @@ const MailingComposePage: FC = function () {
       <div className="block items-center justify-between border-b border-gray-200 bg-white p-4 py-6 dark:border-gray-700 dark:bg-gray-800 sm:flex">
         <div className="flex items-center justify-between divide-x divide-gray-100 dark:divide-gray-700 w-full">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl capitalize">
-            {userInfo?.data[0]?.name}
+            {userInfo?.["data"][0]?.name}
             <p className="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">
               {moment().format("DD MMMM YYYY")}
             </p>

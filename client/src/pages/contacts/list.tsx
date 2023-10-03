@@ -35,7 +35,7 @@ const ContactsListPage: FC = function () {
     queryFn: readContacts,
   });
 
-  function applySortFilter(array, query) {
+  function applySortFilter(array: any, query: String) {
     if (query) {
       return filter(array, (data) => {
         const values = Object.values(data);

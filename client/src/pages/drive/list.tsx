@@ -27,7 +27,6 @@ import {
   HiTrash,
   HiUpload,
 } from "react-icons/hi";
-import { filter } from "lodash";
 import axios from "axios";
 import moment from "moment";
 import { FaPlus } from "react-icons/fa6";
@@ -156,7 +155,7 @@ const AllUsersTable: FC<{
     });
 
     try {
-      const response = await client.send(deleteCommand);
+      await client.send(deleteCommand);
 
       await axios.post(
         baseURL + `remove-file?userID=${userInfo?.["ID"]}&filePath=${key}`
@@ -180,7 +179,7 @@ const AllUsersTable: FC<{
         {contents.map((content: any) => (
           <Table.Row
             className="hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={(event) => {
+            onClick={() => {
               if (!Boolean(content.file_path)) {
                 setPrefix(prefix + content.name);
               }
@@ -273,7 +272,9 @@ export const Pagination: FC = function () {
   );
 };
 
-const UploadFileModal: FC = function ({ prefix }) {
+const UploadFileModal: FC<{
+  prefix: String;
+}> = function ({ prefix }) {
   const [isOpen, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -377,7 +378,10 @@ const UploadFileModal: FC = function ({ prefix }) {
           </form>
         </Modal.Body>
         <Modal.Footer className="flex justify-end">
-          <Button color="primary" onClick={() => handleUpload(selectedFile)}>
+          <Button
+            color="primary"
+            onClick={() => handleUpload(selectedFile as File)}
+          >
             Upload
           </Button>
         </Modal.Footer>
@@ -386,7 +390,9 @@ const UploadFileModal: FC = function ({ prefix }) {
   );
 };
 
-const CreateFolderModal: FC = function ({ prefix }) {
+const CreateFolderModal: FC<{
+  prefix: String;
+}> = function ({ prefix }) {
   const [isOpen, setOpen] = useState(false);
   const { userInfo } = useContext(FileSharingContext);
   const [folderName, setFolderName] = useState<String | "">("");
