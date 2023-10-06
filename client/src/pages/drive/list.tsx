@@ -474,7 +474,7 @@ const DeleteModal: FC<{
   contentKey: any;
   handleRemove: any;
   setOpen: any;
-  isOpen: Boolean;
+  isOpen: any;
   isRemoving: Boolean;
 }> = function ({ contentKey, handleRemove, isOpen, setOpen, isRemoving }) {
   return (
