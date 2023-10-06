@@ -49,7 +49,8 @@ const ExampleSidebar: FC = function () {
                   open={isEcommerceOpen}
                 ></Sidebar.Collapse>
                 <Sidebar.Item
-                  href="/contacts"
+                  // href="/contacts"
+                  onClick={() => navigate("/contacts")}
                   icon={BiSolidContact}
                   className={
                     "/contacts" === currentPage
@@ -71,7 +72,8 @@ const ExampleSidebar: FC = function () {
                   open={isEcommerceOpen}
                 >
                   <Sidebar.Item
-                    href="/mailing/compose"
+                    // href="/mailing/compose"
+                    onClick={() => navigate("/mailing/compose")}
                     icon={FaEdit}
                     className={
                       "/mailing/compose" === currentPage
