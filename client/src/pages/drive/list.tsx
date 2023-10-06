@@ -14,11 +14,13 @@ import {
   Label,
   Modal,
   Progress,
+  Spinner,
   Table,
   TextInput,
 } from "flowbite-react";
 import { FC, useContext, useEffect, useState } from "react";
 import { FcFile, FcFolder } from "react-icons/fc";
+import { FiArrowLeft } from "react-icons/fi";
 import {
   HiChevronLeft,
   HiChevronRight,
@@ -39,7 +41,7 @@ const DriveListPage: FC = function () {
   const { userInfo } = useContext(FileSharingContext);
   const [prefix, setPrefix] = useState("/");
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, refetch } = useQuery({
+  const { data, refetch, isLoading, isFetching } = useQuery({
     queryKey: ["drive"],
     queryFn: () => readFiles(userInfo?.["ID"], prefix, searchQuery),
   });
@@ -77,7 +79,13 @@ const DriveListPage: FC = function () {
       </div>
       <Card className="m-5">
         <div className="flex w-full items-center justify-between">
-          <h6 className="text-lg font-semibold text-gray-900 dark:text-white capitalize ">
+          <h6 className="text-lg font-semibold text-gray-900 dark:text-white capitalize flex items-center gap-2 ">
+            {prefix !== "/" && (
+              <FiArrowLeft
+                className="cursor-pointer"
+                onClick={() => setPrefix("/")}
+              />
+            )}
             {userInfo?.["name"]} Folder
           </h6>
           <div className="flex items-center justify-end gap-2">
@@ -91,6 +99,8 @@ const DriveListPage: FC = function () {
               <div className="overflow-hidden shadow">
                 <AllUsersTable
                   contents={data ?? []}
+                  isFetching={isFetching}
+                  isLoading={isLoading}
                   setPrefix={setPrefix}
                   prefix={prefix}
                 />
@@ -107,17 +117,20 @@ const AllUsersTable: FC<{
   contents: any;
   setPrefix: any;
   prefix: String;
-}> = function ({ contents, setPrefix, prefix }) {
+  isFetching: Boolean;
+  isLoading: Boolean;
+}> = function ({ contents, setPrefix, prefix, isFetching, isLoading }) {
   const { userInfo } = useContext(FileSharingContext);
   const queryClient = useQueryClient();
   const [isOpen, setOpen] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const handleClick = async (key: String) => {
     const client = new S3Client({
       region: "us-east-1",
       credentials: {
-        accessKeyId: "AKIAYJALDLHGHP7ZTOXZ",
-        secretAccessKey: "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",
+        accessKeyId: import.meta.env["VITE_AWS_ACCESS_KEY_ID"],
+        secretAccessKey: import.meta.env["VITE_AWS_SECRET_ACCESS_KEY"],
       },
     });
 
@@ -141,8 +154,8 @@ const AllUsersTable: FC<{
     const client = new S3Client({
       region: "us-east-1",
       credentials: {
-        accessKeyId: "AKIAYJALDLHGHP7ZTOXZ",
-        secretAccessKey: "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",
+        accessKeyId: import.meta.env["VITE_AWS_ACCESS_KEY_ID"],
+        secretAccessKey: import.meta.env["VITE_AWS_SECRET_ACCESS_KEY"],
       },
     });
 
@@ -155,6 +168,7 @@ const AllUsersTable: FC<{
     });
 
     try {
+      setIsRemoving(true);
       await client.send(deleteCommand);
 
       await axios.post(
@@ -163,68 +177,80 @@ const AllUsersTable: FC<{
 
       queryClient.invalidateQueries({ queryKey: ["drive"] });
       setOpen(false);
+      setIsRemoving(false);
     } catch (error) {
       console.error("Error generating signed URL:", error);
+      setIsRemoving(false);
     }
   };
 
   return (
-    <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-      <Table.Head className="bg-gray-100 dark:bg-gray-700">
-        <Table.HeadCell>File Name</Table.HeadCell>
-        <Table.HeadCell>Creation Date</Table.HeadCell>
-        <Table.HeadCell></Table.HeadCell>
-      </Table.Head>
-      <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-        {contents.map((content: any) => (
-          <Table.Row
-            className="hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={() => {
-              if (!Boolean(content.file_path)) {
-                setPrefix(prefix + content.name);
-              }
-            }}
-          >
-            <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0">
-              <div className="flex text-sm text-gray-500 dark:text-gray-400 gap-3 items-center">
-                {Boolean(content.file_path) ? (
-                  <FcFile className="w-7 h-7" />
-                ) : (
-                  <FcFolder className="w-7 h-7" />
-                )}
-                <span>{content.name}</span>
-              </div>
-            </Table.Cell>
-            <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
-              <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                {moment(content?.creation_date).format("DD MMM YYYY")}
-              </div>
-            </Table.Cell>
+    <>
+      {isLoading || isFetching ? (
+        <div className="text-center p-2">
+          <Spinner color={"success"} size={"xl"} />
+        </div>
+      ) : (
+        <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+          <Table.Head className="bg-gray-100 dark:bg-gray-700">
+            <Table.HeadCell>File Name</Table.HeadCell>
+            <Table.HeadCell>Creation Date</Table.HeadCell>
+            <Table.HeadCell></Table.HeadCell>
+          </Table.Head>
 
-            <Table.Cell className="flex gap-2">
-              {Boolean(content.file_path) && (
-                <div
-                  className="flex items-center gap-x-3 whitespace-nowrap"
-                  onClick={() => handleClick(content.file_path)}
-                >
-                  <Button color="primary">View</Button>
-                </div>
-              )}
-              {Boolean(content.file_path) && (
-                <div className="flex items-center gap-x-3 whitespace-nowrap">
-                  <DeleteModal
-                    handleRemove={handleRemove}
-                    contentKey={content.file_path}
-                    isOpen={isOpen}
-                    setOpen={setOpen}
-                  />
-                </div>
-              )}
-            </Table.Cell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
+          <Table.Body className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+            {contents.map((content: any) => (
+              <Table.Row
+                className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => {
+                  if (!Boolean(content.file_path)) {
+                    setPrefix(prefix + content.name);
+                  }
+                }}
+              >
+                <Table.Cell className="mr-12 flex items-center space-x-6 whitespace-nowrap p-4 lg:mr-0 cursor-pointer">
+                  <div className="flex text-sm text-gray-500 dark:text-gray-400 gap-3 items-center">
+                    {Boolean(content.file_path) ? (
+                      <FcFile className="w-7 h-7" />
+                    ) : (
+                      <FcFolder className="w-7 h-7" />
+                    )}
+                    <span>{content.name}</span>
+                  </div>
+                </Table.Cell>
+                <Table.Cell className="whitespace-nowrap p-4 text-base font-medium text-gray-900 dark:text-white">
+                  <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                    {moment(content?.creation_date).format("DD MMM YYYY")}
+                  </div>
+                </Table.Cell>
+
+                <Table.Cell className="flex gap-2">
+                  {Boolean(content.file_path) && (
+                    <div
+                      className="flex items-center gap-x-3 whitespace-nowrap"
+                      onClick={() => handleClick(content.file_path)}
+                    >
+                      <Button color="primary">View</Button>
+                    </div>
+                  )}
+                  {Boolean(content.file_path) && (
+                    <div className="flex items-center gap-x-3 whitespace-nowrap">
+                      <DeleteModal
+                        handleRemove={handleRemove}
+                        contentKey={content.file_path}
+                        isOpen={isOpen}
+                        setOpen={setOpen}
+                        isRemoving={isRemoving}
+                      />
+                    </div>
+                  )}
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      )}
+    </>
   );
 };
 
@@ -281,19 +307,17 @@ const UploadFileModal: FC<{
   const queryClient = useQueryClient();
   const { userInfo } = useContext(FileSharingContext);
 
-  const handleFileChange = (e: any) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      setSelectedFile(files[0]);
+  const handleUpload = async (event: any) => {
+    const file = event.target.files;
+    const selectedFile = file[0];
+    if (file && file.length > 0) {
+      setSelectedFile(file[0]);
     }
-  };
-
-  const handleUpload = async (selectedFile: File) => {
     const client = new S3Client({
       region: "us-east-1",
       credentials: {
-        accessKeyId: "AKIAYJALDLHGHP7ZTOXZ",
-        secretAccessKey: "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",
+        accessKeyId: import.meta.env["VITE_AWS_ACCESS_KEY_ID"],
+        secretAccessKey: import.meta.env["VITE_AWS_SECRET_ACCESS_KEY"],
       },
     });
 
@@ -362,7 +386,7 @@ const UploadFileModal: FC<{
                     <input
                       type="file"
                       className="hidden"
-                      onChange={handleFileChange}
+                      onChange={handleUpload}
                     />
                   </label>
                 </div>
@@ -377,14 +401,6 @@ const UploadFileModal: FC<{
             </div>
           </form>
         </Modal.Body>
-        <Modal.Footer className="flex justify-end">
-          <Button
-            color="primary"
-            onClick={() => handleUpload(selectedFile as File)}
-          >
-            Upload
-          </Button>
-        </Modal.Footer>
       </Modal>
     </>
   );
@@ -394,14 +410,14 @@ const CreateFolderModal: FC<{
   prefix: String;
 }> = function ({ prefix }) {
   const [isOpen, setOpen] = useState(false);
+  const [isLoading, seIstLoading] = useState(false);
   const { userInfo } = useContext(FileSharingContext);
   const [folderName, setFolderName] = useState<String | "">("");
   const queryClient = useQueryClient();
 
-  console.log(userInfo);
   const createFolder = async (folderName: String) => {
     const currentTime = moment();
-
+    seIstLoading(true);
     axios
       .post(baseURL + "update-file-record", {
         file_path: "",
@@ -411,8 +427,9 @@ const CreateFolderModal: FC<{
         name: folderName,
       })
       .then(() => {
-        setOpen(false);
         queryClient.invalidateQueries({ queryKey: ["drive"] });
+        setOpen(false);
+        seIstLoading(false);
       });
   };
 
@@ -426,8 +443,13 @@ const CreateFolderModal: FC<{
         <Modal.Header className="border-b border-gray-200 !p-6 dark:border-gray-700">
           <strong>Create Folder</strong>
         </Modal.Header>
-        <Modal.Body>
-          <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            createFolder(folderName);
+          }}
+        >
+          <Modal.Body>
             <TextInput
               id="folder"
               placeholder="add folder name"
@@ -436,13 +458,13 @@ const CreateFolderModal: FC<{
               type="text"
               onChange={(e) => setFolderName(e.target.value)}
             />
-          </form>
-        </Modal.Body>
-        <Modal.Footer className="flex justify-end">
-          <Button color="primary" onClick={() => createFolder(folderName)}>
-            Create
-          </Button>
-        </Modal.Footer>
+          </Modal.Body>
+          <Modal.Footer className="flex justify-end">
+            <Button color="primary" disabled={isLoading} type="submit">
+              Create
+            </Button>
+          </Modal.Footer>
+        </form>
       </Modal>
     </>
   );
@@ -452,8 +474,9 @@ const DeleteModal: FC<{
   contentKey: any;
   handleRemove: any;
   setOpen: any;
-  isOpen: any;
-}> = function ({ contentKey, handleRemove, isOpen, setOpen }) {
+  isOpen: Boolean;
+  isRemoving: Boolean;
+}> = function ({ contentKey, handleRemove, isOpen, setOpen, isRemoving }) {
   return (
     <>
       <Button color="failure" onClick={() => setOpen(true)}>
@@ -473,7 +496,11 @@ const DeleteModal: FC<{
               Are you sure you want to delete this file?
             </p>
             <div className="flex items-center gap-x-3">
-              <Button color="failure" onClick={() => handleRemove(contentKey)}>
+              <Button
+                color="failure"
+                disabled={isRemoving}
+                onClick={() => handleRemove(contentKey)}
+              >
                 Confirm
               </Button>
               <Button color="gray" onClick={() => setOpen(false)}>

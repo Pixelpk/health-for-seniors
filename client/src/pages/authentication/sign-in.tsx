@@ -45,11 +45,7 @@ const SignInPage: FC = function () {
     login(data)
       .then(async () => {
         const users = await readContacts();
-        console.log(
-          users.data.filter(
-            (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
-          )
-        );
+
         users.data.filter(
           (user: any) => user.email.toLowerCase() === data.email.toLowerCase()
         );
